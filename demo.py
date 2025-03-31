@@ -5,7 +5,7 @@ from deap import base, creator, tools, algorithms
 COURSES = {
     "Automat và ngôn ngữ hình thức": [
         ("ThS.Trần Đình Sơn", "Thứ Sáu", [8, 9], "K.A213"),
-        ("ThS.Dương Thị Mai Nga", "Thứ Tư", [3, 4], "K.A313"),
+        ("ThS.Dương Thị Mai Nga", "Thứ Tư", [3, 4], "K.A313") ,
         ("TS.Nguyễn Đức Hiển", "Thứ Hai", [1, 2], "K.A113"),
     ],
     "Bảo mật và an toàn hệ thống thông tin": [
@@ -17,6 +17,11 @@ COURSES = {
         ("PGS.TS.Nguyễn Thanh Bình", "Thứ Hai", [1, 2], "K.A110"),
     ]
 }
+
+# [1, 0, 1],
+# [1, 0, 1],
+# [1, 0, 1],
+# [1, 0, 1],
 
 # Các môn học mà người dùng chọn
 USER_INPUT = ["Automat và ngôn ngữ hình thức", "Bảo mật và an toàn hệ thống thông tin",
@@ -74,6 +79,12 @@ def evaluate(individual):
     # Loại bỏ ngày không muốn học
     unwanted_day_penalty = sum(1 for _, (_, day, _, _) in selected_classes if day in UNWANTED_DAYS)
 
+
+    # Nếu có xung đột, trả về giá trị lớn để loại bỏ cá thể
+    if conflicts > 0:
+        return 1000, 1000, 1000
+
+
     return conflicts, gaps, unwanted_teacher_penalty, unwanted_room_penalty, unwanted_day_penalty
 
 
@@ -92,7 +103,7 @@ def main():
     algorithms.eaMuPlusLambda(pop, toolbox, mu=100, lambda_=100, cxpb=0.7, mutpb=0.2, ngen=50, verbose=False)
 
     pareto_front = tools.sortNondominated(pop, len(pop), first_front_only=True)[0]
-
+    print(pareto_front)
     print("\n🔹 Các lịch trình tối ưu:")
 
     for ind in pareto_front:
