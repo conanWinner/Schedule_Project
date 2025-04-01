@@ -48,9 +48,12 @@
 *(mọi người tìm được prompt nào gây khó tách param thì có thể bỏ vào đây cùng nghiên cứu nhé)*
 
 1. tôi muốn ngày học 2 buổi, mỗi buổi 2 môn 
-> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, rest_interval: 0, up_or_down: "down", like: true}`
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 2, subject_per_day: 4, rest_interval: 0, up_or_down: "down", like: true}`
 2. tôi muốn ngày học 2 buổi, mỗi buổi 1 môn
-> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, rest_interval: 2, up_or_down: "up", like: true}`
-3. tôi muốn học buổi sáng
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 1, subject_per_day: 2, rest_interval: 2, up_or_down: "up", like: true}`
+3. tôi muốn ngày học 1 buổi, buổi đó chỉ học 1 môn 
+> `periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 1, subject_per_day: 1, rest_interval: 7 (càng lớn càng tốt), up_or_down: "up", like: true`
+4. tôi muốn ngày học 1 buổi, buổi đó chỉ học 2 môn
+> `periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 2, subject_per_day: 2, rest_interval: 0, up_or_down: "down", like: true`
+5. tôi muốn học buổi sáng
 > `{periods: [1, 2, 3, 4], like: true}`
-4. 
