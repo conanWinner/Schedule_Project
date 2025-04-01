@@ -19,7 +19,7 @@
 ## Return param với barem tương ứng:
 *(các kiểu return dưới đây chỉ là mẫu)*
 
-- **Buổi:** `"Sáng" / "Chiều"`
+- **Buổi:** `{periods: [1, 2, 3, 4], like: true || false}`
 - **Giáo viên:** `{teacher: "ThS. Lê Viết Trương", like: true || false}`
 - **Khu:** `{area: "K" || "V", like: true || false}`
 - **Phòng:** `{room: "A.101", like: true || false}`
@@ -47,4 +47,10 @@
 
 *(mọi người tìm được prompt nào gây khó tách param thì có thể bỏ vào đây cùng nghiên cứu nhé)*
 
-1.
+1. tôi muốn ngày học 2 buổi, mỗi buổi 2 môn 
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, rest_interval: 0, up_or_down: "down", like: true}`
+2. tôi muốn ngày học 2 buổi, mỗi buổi 1 môn
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, rest_interval: 2, up_or_down: "up", like: true}`
+3. tôi muốn học buổi sáng
+> `{periods: [1, 2, 3, 4], like: true}`
+4. 
