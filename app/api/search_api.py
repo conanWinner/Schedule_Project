@@ -64,6 +64,7 @@ def search():
 
         results_dict[query] = unique_results if unique_results else [{"Tên lớp học phần": "Không tìm thấy", "Giảng viên": "", "score": 0}]
 
+
     return jsonify(results_dict)
 
 if __name__ == "__main__":
