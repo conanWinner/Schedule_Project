@@ -1,10 +1,7 @@
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
-from pymongo import MongoClient
-from sentence_transformers import SentenceTransformer
-import os
+
 import re
-from dotenv import load_dotenv
 
 
 def split_ten_lop_hoc_phan(ten_lop_hoc):
@@ -34,20 +31,13 @@ def split_ten_lop_hoc_phan(ten_lop_hoc):
     return ten_hoc_phan, lop_hoc_phan, the_loai
 
 
-# Tải các biến môi trường từ file .env
-load_dotenv()
-# Lấy giá trị của biến môi trường
-mongo_uri = os.getenv('MONGO_URI')
+
 
 # Đọc dữ liệu từ Excel
 file_path = "../../data/input/tkb_ai.xlsx"
 df = pd.read_excel(file_path, sheet_name="Table 3")
 
-client = MongoClient(mongo_uri)
 
-# Chọn database và collection
-db = client["university_db"]
-collection = db["ly_courses"]
 
 # Xử lý dữ liệu: Chuyển đổi theo yêu cầu
 data = []
@@ -87,20 +77,4 @@ df_new = pd.DataFrame(data)
 df_new.to_excel("./output/output_Ly.xlsx", index=False, engine="openpyxl")
 
 print("Dữ liệu đã được lưu vào file output_Ly.xlsx")
-# Chèn dữ liệu vào MongoDB
-# collection.insert_many(data)
-# print("✅ Dữ liệu đã nhập vào MongoDB thành công!")
 
-#
-# # Load model Sentence Transformers
-# model = SentenceTransformer("all-MiniLM-L6-v2")
-#
-# # Cập nhật từng môn học với embedding tương ứng
-# for course in collection.find():
-#     course_name = course["Tên lớp học phần"]  # Giả sử cột này chứa tên môn học
-#     embedding = model.encode(course_name).tolist()
-#
-#     # Cập nhật MongoDB với embedding
-#     collection.update_one({"_id": course["_id"]}, {"$set": {"embedding": embedding}})
-#
-# print("✅ Embeddings đã được tạo và lưu vào MongoDB!")

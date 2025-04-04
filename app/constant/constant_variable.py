@@ -1,4 +1,4 @@
-from service.constraints_service import periods, teacher, area, room, day, sub_per_session, sub_per_day, period_onward, \
+from app.service.constraints_service import periods, teacher, area, room, day, sub_per_session, sub_per_day, period_onward, \
     hour_onward, rest_interval
 
 # Dữ liệu mẫu (danh sách lớp học)
