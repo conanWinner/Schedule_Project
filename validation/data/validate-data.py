@@ -84,9 +84,9 @@ for index, row in df.iterrows():
 df_new = pd.DataFrame(data)
 
 # Lưu vào file Excel
-df_new.to_excel("./output/output.xlsx", index=False, engine="openpyxl")
+df_new.to_excel("./output/output_Ly.xlsx", index=False, engine="openpyxl")
 
-print("Dữ liệu đã được lưu vào file output.xlsx")
+print("Dữ liệu đã được lưu vào file output_Ly.xlsx")
 # Chèn dữ liệu vào MongoDB
 # collection.insert_many(data)
 # print("✅ Dữ liệu đã nhập vào MongoDB thành công!")

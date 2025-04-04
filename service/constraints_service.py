@@ -1,7 +1,7 @@
-# @desc: All of basis constraints
+
 from utils.schedule_of_classes import schedule_of_classes
 
-
+# @desc: All of basis constraints
 def non_conflict_periods(selected_classes):
     # Không trùng tiết học
     conflicts = 0
@@ -15,7 +15,8 @@ def non_conflict_periods(selected_classes):
 
     return conflicts
 
-
+def check_number_of_student(selected_classes):
+    return
 
 # @desc: Optional constraint
 def min_gap_between_classes(selected_classes):

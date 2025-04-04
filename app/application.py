@@ -1,7 +1,8 @@
 import random
 from deap import base, creator, tools, algorithms
 
-from utils.constant_variable import user_preferences, PREFERENCE_FUNCTIONS, USER_INPUT, COURSES
+from service.constraints_service import non_conflict_periods
+from constant.constant_variable import user_preferences, PREFERENCE_FUNCTIONS, USER_INPUT, COURSES
 
 NUM_COURSES = len(USER_INPUT)
 COURSE_OPTIONS = [len(COURSES[course]) for course in USER_INPUT]  # Số lớp mỗi môn
@@ -25,11 +26,14 @@ def init_individual():
 def evaluate(individual, user_preferences):
     selected_classes = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(individual)]
 
+    conflict = non_conflict_periods(selected_classes)
+
     priority_score = 0
     for key, preference in user_preferences.items():
         if key in PREFERENCE_FUNCTIONS:
             priority_score += PREFERENCE_FUNCTIONS[key](selected_classes, preference)
 
+    priority_score += conflict
     return (priority_score, )
 
 
@@ -54,15 +58,13 @@ def main():
     for ind in pareto_front:
         schedule = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(ind)]
         print(f"📌 Lịch: {schedule}")
-        print(f"❌ Xung đột: {ind.fitness.values[0]}")
+        print(f"❌ Số điểm ưu tiên: {ind.fitness.values[0]}")
         # print(f"🕐 Khoảng trống: {ind.fitness.values[1]}")
         # print(f"🚫 Giáo viên bị cấm: {ind.fitness.values[2]}")
         # print(f"🏠 Phòng bị cấm: {ind.fitness.values[3]}")
         # print(f"📅 Ngày bị cấm: {ind.fitness.values[4]}\n")
 
-    # for key, preference in user_preferences.items():
-    #     print(key)
-    #     print(preference)
+
 
 
 if __name__ == "__main__":
