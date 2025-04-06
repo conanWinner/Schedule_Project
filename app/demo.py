@@ -1,7 +1,7 @@
 import random
 from deap import base, creator, tools, algorithms
 
-from app.constant.constant_variable import user_preferences, PREFERENCE_FUNCTIONS, USER_INPUT, COURSES
+from app.constant.constant_input_test import user_preferences, PREFERENCE_FUNCTIONS, USER_INPUT, COURSES
 from app.constant.schedule_of_classes import schedule_of_classes
 
 NUM_COURSES = len(USER_INPUT)
@@ -198,6 +198,23 @@ toolbox.register("select", tools.selNSGA2)
 def main():
     random.seed(42)
     pop = toolbox.population(n=30)
+
+    # Tham số:
+    # pop: Đây là quần thể (population) ban đầu. pop là một danh sách các cá thể (individuals) mà thuật toán tiến hoá sẽ làm việc với. Trong trường hợp của bạn, pop được khởi tạo từ toolbox.population(n=30) với 30 cá thể.
+    #
+    # toolbox: Đây là đối tượng chứa các công cụ và chiến lược của thuật toán tiến hoá, bao gồm các hàm tạo cá thể, hàm đánh giá, hàm lai ghép (crossover), hàm đột biến (mutation), và hàm chọn lọc (selection).
+    #
+    # mu (Số lượng cá thể mẹ): mu là số lượng cá thể trong quần thể mẹ (mà thuật toán tiến hoá sẽ tạo ra qua các thế hệ). Ở đây, mu=100 có nghĩa là sẽ có 100 cá thể trong quần thể mẹ.
+    #
+    # lambda_ (Số lượng cá thể con): lambda_ là số lượng cá thể con được sinh ra trong mỗi thế hệ mới. Ở đây, lambda_=100, có nghĩa là 100 cá thể con sẽ được sinh ra trong mỗi thế hệ.
+    #
+    # cxpb (Xác suất lai ghép): cxpb là xác suất lai ghép (crossover probability) giữa hai cá thể cha mẹ để tạo ra cá thể con. Ở đây, cxpb=0.7, có nghĩa là mỗi lần lai ghép giữa hai cá thể cha mẹ, xác suất thành công là 70%.
+    #
+    # mutpb (Xác suất đột biến): mutpb là xác suất đột biến (mutation probability) của một cá thể. Ở đây, mutpb=0.2, có nghĩa là 20% cá thể sẽ bị đột biến sau mỗi thế hệ.
+    #
+    # ngen (Số thế hệ): ngen là số thế hệ (generations) mà thuật toán sẽ chạy. Mỗi thế hệ sẽ bao gồm việc tạo ra cá thể con từ quần thể mẹ thông qua các phép lai ghép và đột biến. Ở đây, ngen=50 có nghĩa là thuật toán sẽ chạy trong 50 thế hệ.
+    #
+    # verbose: Tham số này quyết định mức độ chi tiết của các thông báo trong quá trình chạy. Nếu verbose=True, thuật toán sẽ in ra nhiều thông tin chi tiết về quá trình tiến hoá. Nếu verbose=False, thuật toán sẽ chạy mà không in ra nhiều thông tin.
     algorithms.eaMuPlusLambda(pop, toolbox, mu=100, lambda_=100, cxpb=0.7, mutpb=0.2, ngen=50, verbose=False)
 
     pareto_front = tools.sortNondominated(pop, len(pop), first_front_only=True)[0]

@@ -1,21 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
-from sentence_transformers import SentenceTransformer
-from dotenv import load_dotenv
 import os
+from app.config.database_configuration import get_database
+from app.config.embedding_model import load_model
+from app.service.constraints_service import run_nsga_ii
 
-load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Kết nối MongoDB Atlas
-client = MongoClient(os.getenv("MONGO_URI"))
-db = client["university_db"]
-collection = db["courses"]
-
-# Load mô hình Sentence Transformer để tạo embeddings
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Gọi hàm để lấy database
+db = get_database()
+collection = db["ly_courses"]
+# Load mô hình
+model = load_model()
 
 @app.route("/search", methods=["POST"])
 def search():
@@ -26,7 +23,7 @@ def search():
     if not queries:
         return jsonify({"error": "Missing queries"}), 400
 
-    results_dict = {}
+    courses_data = {}
 
     for query in queries:
         query_vector = model.encode(query).tolist()
@@ -44,28 +41,56 @@ def search():
             {"$unset": "embedding"},
             {
                 "$project": {
-                    "_id": 0,  # Ẩn ID để tránh lỗi trùng
-                    "Tên lớp học phần": 1,
+                    "_id": 0,
+                    "Tên học phần": 1,
                     "Giảng viên": 1,
+                    "Thứ": 1,
+                    "Tiết": 1,
+                    "Khu vực": 1,
+                    "Số phòng": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
             }
         ]
 
         results = list(collection.aggregate(pipeline))
+        print(pipeline)
+        print("Results:", results)
 
-        # 🔥 Loại bỏ bản ghi trùng lặp dựa trên "Tên lớp học phần"
-        unique_results = []
-        seen_courses = set()
+        # Định dạng kết quả - giữ lại tất cả các lớp khác nhau
+        formatted_results = []
+
         for item in results:
-            if item["Tên lớp học phần"] not in seen_courses:
-                seen_courses.add(item["Tên lớp học phần"])
-                unique_results.append(item)
+            # Chuyển đổi chuỗi Tiết thành list số nếu cần
+            try:
+                tiets = eval(item["Tiết"]) if isinstance(item["Tiết"], str) else item["Tiết"]
+                # import ast
+                # tiets = ast.literal_eval(item["Tiết"]) if isinstance(item["Tiết"], str) else item["Tiết"]
+            except:
+                tiets = []
 
-        results_dict[query] = unique_results if unique_results else [{"Tên lớp học phần": "Không tìm thấy", "Giảng viên": "", "score": 0}]
+            course_info = (
+                item["Giảng viên"],
+                item["Thứ"],
+                tiets,
+                item["Khu vực"],
+                item["Số phòng"]
+            )
+            formatted_results.append(course_info)
 
+        if formatted_results:
+            courses_data[query] = formatted_results
+        else:
+            courses_data[query] = [("Không tìm thấy", "", [], "", "")]
 
-    return jsonify(results_dict)
+    # ⚙️ Gọi hàm NSGA-II
+    schedules = run_nsga_ii(courses_data)
+
+    return jsonify({
+            "schedules": schedules,
+            "message": "Đã sắp xếp thành công"
+    })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)

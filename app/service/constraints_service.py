@@ -1,11 +1,9 @@
 import random
 from deap import base, creator, tools, algorithms
 
-from app.constant.constant_variable import user_preferences, PREFERENCE_FUNCTIONS, USER_INPUT, COURSES
+from app.constant.constant_input_test import user_preferences
 from app.constant.schedule_of_classes import schedule_of_classes
 
-NUM_COURSES = len(USER_INPUT)
-COURSE_OPTIONS = [len(COURSES[course]) for course in USER_INPUT]  # Số lớp mỗi môn
 
 # Thiết lập NSGA-II
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -161,60 +159,72 @@ def rest_interval(selected_classes, preference):
     return -gaps if preference['like'] else gaps
 
 
-def init_individual():
-    # [(subject_id, (teacher, day, periods, area, room))]
-    return creator.Individual([random.randint(0, options - 1) for options in COURSE_OPTIONS])
+CONSTRAINT_FUNCTIONS = {
+    "periods": periods,
+    "teacher": teacher,
+    "area": area,
+    "room": room,
+    "day": day,
+    "subject_per_session": sub_per_session,
+    "subject_per_day": sub_per_day,
+    "period_onward": period_onward,
+    "hour_onward": hour_onward,
+    "rest_interval": rest_interval
+}
 
-
-
-
-# Vì thuật toán NSGA-II tối ưu theo hướng giá trị nhỏ hơn là tốt hơn, nên:
-#   - Lịch không có xung đột (conflicts = 0) được ưu tiên.
-#   - Lịch có khoảng trống nhỏ (gaps nhỏ) tốt hơn. (Optional)
-#   - Lịch học thỏa mãn sở thích người dùng (priority_score càng âm càng tốt) được ưu tiên hơn.
-def evaluate(individual, user_preferences):
+def evaluate(individual, user_preferences, USER_INPUT, COURSES):
     selected_classes = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(individual)]
 
     conflict = non_conflict_periods(selected_classes)
 
     priority_score = 0
     for key, preference in user_preferences.items():
-        if key in PREFERENCE_FUNCTIONS:
-            priority_score += PREFERENCE_FUNCTIONS[key](selected_classes, preference)
+        if key in CONSTRAINT_FUNCTIONS:
+            priority_score += CONSTRAINT_FUNCTIONS[key](selected_classes, preference)
 
     priority_score += conflict
     return (priority_score, )
 
 
 toolbox = base.Toolbox()
-toolbox.register("individual", init_individual)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("evaluate", lambda ind: evaluate(ind, user_preferences))
-toolbox.register("mate", tools.cxTwoPoint)
-toolbox.register("mutate", tools.mutUniformInt, low=0, up=[o - 1 for o in COURSE_OPTIONS], indpb=0.2)
-toolbox.register("select", tools.selNSGA2)
 
 
-def main():
+
+def run_nsga_ii(courses_data):
+    USER_INPUT = list(courses_data.keys())
+    COURSE_OPTIONS = [len(courses_data[course]) for course in USER_INPUT]
+    POPULATION_SIZE = 30
+    CROSSOVER = 0.7
+    MUTATION = 0.3
+    NUMBER_OF_GEN = 50
+
+
+    # Đăng ký các hàm với toolbox
+    def init_individual():
+        return creator.Individual([random.randint(0, options - 1) for options in COURSE_OPTIONS])
+
+    toolbox.register("individual", init_individual)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("evaluate", lambda ind: evaluate(ind, user_preferences, USER_INPUT, courses_data))
+    toolbox.register("mate", tools.cxTwoPoint)
+    toolbox.register("mutate", tools.mutUniformInt, low=0, up=[o - 1 for o in COURSE_OPTIONS], indpb=MUTATION)
+    toolbox.register("select", tools.selNSGA2)
+
+    # Chạy thuật toán
     random.seed(42)
-    pop = toolbox.population(n=30)
-    algorithms.eaMuPlusLambda(pop, toolbox, mu=100, lambda_=100, cxpb=0.7, mutpb=0.2, ngen=50, verbose=False)
+    pop = toolbox.population(n=POPULATION_SIZE)
+    algorithms.eaMuPlusLambda(pop, toolbox, mu=POPULATION_SIZE, lambda_=POPULATION_SIZE, cxpb=CROSSOVER, mutpb=MUTATION, ngen=NUMBER_OF_GEN, verbose=False)
 
+    # Lấy kết quả Pareto front
     pareto_front = tools.sortNondominated(pop, len(pop), first_front_only=True)[0]
-    print(pareto_front)
-    print("\n🔹 Các lịch trình tối ưu:")
 
+    # Chuẩn bị kết quả trả về
+    results = []
     for ind in pareto_front:
-        schedule = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(ind)]
-        print(f"📌 Lịch: {schedule}")
-        print(f"❌ Số điểm ưu tiên: {ind.fitness.values[0]}")
-        # print(f"🕐 Khoảng trống: {ind.fitness.values[1]}")
-        # print(f"🚫 Giáo viên bị cấm: {ind.fitness.values[2]}")
-        # print(f"🏠 Phòng bị cấm: {ind.fitness.values[3]}")
-        # print(f"📅 Ngày bị cấm: {ind.fitness.values[4]}\n")
+        schedule = [(USER_INPUT[i], courses_data[USER_INPUT[i]][idx]) for i, idx in enumerate(ind)]
+        results.append({
+            "schedule": schedule,
+            "score": abs(ind.fitness.values[0])
+        })
 
-
-
-
-if __name__ == "__main__":
-    main()
+    return results

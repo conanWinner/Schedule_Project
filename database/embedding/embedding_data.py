@@ -1,18 +1,15 @@
-import os
 import pandas as pd
 from dotenv import load_dotenv
-from pymongo import MongoClient
-from sentence_transformers import SentenceTransformer
+
+
+from app.config.database_configuration import get_database
+from app.config.embedding_model import load_model
 
 # Tải các biến môi trường từ file .env
 load_dotenv()
 
 # Kết nối tới MongoDB
-mongo_uri = os.getenv("MONGO_URI")
-client = MongoClient(mongo_uri)
-
-# Chọn database và collection
-db = client["university_db"]
+db = get_database()
 collection = db["ly_courses"]
 
 # Đọc dữ liệu từ file Excel đã chuẩn hóa
@@ -29,7 +26,7 @@ collection.insert_many(data)
 print("✅ Dữ liệu đã nhập vào MongoDB thành công!")
 
 # Load model Sentence Transformers
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = load_model()
 
 # Cập nhật từng môn học với embedding tương ứng
 for course in collection.find():
