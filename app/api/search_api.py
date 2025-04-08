@@ -54,7 +54,7 @@ def search():
         ]
 
         results = list(collection.aggregate(pipeline))
-        print(pipeline)
+        # print(pipeline)
         print("Results:", results)
 
         # Định dạng kết quả - giữ lại tất cả các lớp khác nhau

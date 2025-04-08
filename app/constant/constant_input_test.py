@@ -22,8 +22,8 @@ USER_INPUT = ["Automat và ngôn ngữ hình thức", "Bảo mật và an toàn 
 
 
 user_preferences = {
-    "periods": {"value": [1, 2, 3, 4], "like": False},
-    # "teacher": {"name": ["ThS.Dương Thị Mai Nga"], "like": False},
+    "periods": {"value": [1, 2, 3, 4], "like": True},
+    "teacher": {"name": ["ThS.Dương Thị Mai Nga", "TS.Nguyễn Đức Hiển"], "like": False},
     # "room": {"room": "A.101", "like": True},
     # "period_onward": {"period_onward": 6, "like": False}
 }
