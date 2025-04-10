@@ -1,48 +1,119 @@
 {
-  "teacher": {
-    "name": "Thầy Lê Viết Trương",
-    "like": false
+  "defaults": {
+    "subject_per_session": 1,
+    "subject_per_day": 3,
+    "period_onward": {
+      "value": 3,
+      "like": true
+    },
+    "hour_onward": {
+      "value": 9,
+      "unit": "hour",
+      "like": true
+    },
+    "area": {
+      "value": "K",
+      "like": true
+    },
+    "room": [
+      { "value": "A.101", "like": true },
+      { "value": "A.102", "like": true }
+    ],
+    "teacher": [
+      { "name": "Mai Lam", "like": true },
+      { "name": "Tuấn", "like": false }
+    ],
+    "class": [
+      {
+        "name": "Automat và ngôn ngữ hình thức",
+        "class_group": [
+            {"value":  3, "like":  true},
+            {"value":  4, "like":  true}
+          ]
+      },
+      {
+        "name": "Lập trình hướng đối tượng",
+        "class_group": [
+            {"value":  8, "like":  true},
+            {"value":  9, "like":  true}
+          ]
+      }
+    ],
+    "rest_interval": {
+        "value": 1,
+        "up_or_down": "down",
+        "like": true
+    }
   },
-
-  "area": {
-    "value": "K",
-    "like": true
-  },
-
-  "room": {
-    "value": "A.101",
-    "like": true
-  },
-
-  "day": {
-    "value": "Thứ Hai",
-    "like": false
-  },
-
-  "subject_per_session": 1,
-  "subject_per_day": 3,
-
-  "period_onward": {
-    "value": 3,
-    "like": true
-  },
-
-  "hour_onward": {
-    "value": 9,
-    "unit": "hour",
-    "like": true
-  },
-
-  "periods": {
-    "value": [3, 4],
-    "like": true
-  },
-
-  "rest_interval": {
-    "value": 2,
-    "up_or_down": "down",
-    "like": false
-  }
+  "periods": [
+    {
+      "day": {"value":  "Thứ 2", "like":  true},
+      "period": {"value":  [6, 7, 8, 9], "like":  true},
+      "subject_count": {"value":  1, "like":  true},
+      "rest_interval": {
+        "value": 1,
+        "up_or_down": "down",
+        "like": true
+      },
+      "teacher": [
+        { "name": "Mai Lam", "like": true }
+      ],
+      "room": [
+        { "value": "A.101", "like": true }
+      ],
+      "area": {
+        "value": "K",
+        "like": true
+      },
+      "class": [
+        {
+          "name": "Tiếng anh nâng cao 4",
+          "class_group": [
+            {"value":  2, "like":  true},
+            {"value":  4, "like":  true}
+          ]
+        }
+      ],
+        "period_onward": {
+          "value": 8,
+          "like": true
+        },
+        "hour_onward": {
+          "value": 15,
+          "unit": "hour",
+          "like": true
+        }
+    },
+    {
+      "day": {"value":  "Thứ 4", "like":  true},
+      "period": {"value":  [1, 2, 3, 4], "like":  true},
+      "subject_count": {"value":  2, "like":  true},
+      "rest_interval": {
+        "value": 1,
+        "up_or_down": "down",
+        "like": true
+      },
+      "teacher": [
+        { "name": "Phượng", "like": true }
+      ],
+      "room": [
+        { "value": "A.101", "like": false }
+      ],
+      "class": [
+        {
+          "name": "Triết học Mac-Lenin",
+          "class_group": [
+            {"value":  2, "like":  true},
+            {"value":  4, "like":  true}
+          ]
+        }
+      ],
+      "period_onward": null,
+      "hour_onward": null,
+      "area": {
+        "value": "K",
+        "like": true
+      }
+    }
+  ]
 }
-
-

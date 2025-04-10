@@ -14,6 +14,7 @@ collection = db["ly_courses"]
 # Load mô hình
 model = load_model()
 
+
 @app.route("/search", methods=["POST"])
 def search():
     data = request.json
@@ -43,11 +44,16 @@ def search():
                 "$project": {
                     "_id": 0,
                     "Tên học phần": 1,
+                    "Lớp": 1,
+                    "Ngôn ngữ": 1,
+                    "Chuyên ngành": 1,
+                    "Chủ đề phụ": 1,
                     "Giảng viên": 1,
                     "Thứ": 1,
                     "Tiết": 1,
                     "Khu vực": 1,
                     "Số phòng": 1,
+                    "Sỉ số": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
             }
@@ -69,26 +75,32 @@ def search():
             except:
                 tiets = []
 
-            course_info = (
-                item["Giảng viên"],
-                item["Thứ"],
-                tiets,
-                item["Khu vực"],
-                item["Số phòng"]
-            )
+            course_info = {
+                "Tên học phần": item.get("Tên học phần", ""),
+                "Lớp": item.get("Lớp", ""),
+                "Ngôn ngữ": item.get("Ngôn ngữ", ""),
+                "Chuyên ngành": item.get("Chuyên ngành", ""),
+                "Chủ đề phụ": item.get("Chủ đề phụ", ""),
+                "Giảng viên": item.get("Giảng viên", ""),
+                "Thứ": item.get("Thứ", ""),
+                "Tiết": tiets,
+                "Khu vực": item.get("Khu vực", ""),
+                "Số phòng": item.get("Số phòng", ""),
+                "Sỉ số": item.get("Sỉ số", 0),
+            }
             formatted_results.append(course_info)
 
         if formatted_results:
             courses_data[query] = formatted_results
         else:
-            courses_data[query] = [("Không tìm thấy", "", [], "", "")]
+            courses_data[query] = [("Không tìm thấy", "", "", "", "", "", "", [], "", "", "")]
 
     # ⚙️ Gọi hàm NSGA-II
     schedules = run_nsga_ii(courses_data)
 
     return jsonify({
-            "schedules": schedules,
-            "message": "Đã sắp xếp thành công"
+        "schedules": schedules,
+        "message": "Đã sắp xếp thành công"
     })
 
 
