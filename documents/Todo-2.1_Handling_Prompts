@@ -1,0 +1,59 @@
+# Barem chung của các ràng buộc
+
+- **Buổi:** tôi chỉ học buổi sáng - tôi chỉ học buổi chiều
+- **Giáo viên:** tôi thích học thầy/cô này - tôi không thích học thầy/cô này
+- **Khu:** tôi thích học khu này - tôi không thích học khu này
+- **Phòng:** tôi thích học phòng này - tôi không thích học phòng này
+- **Thứ:** tôi thích học cả ngày này trong tuần - tôi thích nghỉ cả ngày này trong tuần
+- **Môn:** 
+  - tôi thích học mỗi buổi một môn (*Môn/buổi*)  
+  - mỗi ngày một môn (*Môn/ngày* )
+- **Tiết:**
+  - tôi thích học từ tiết này trở đi - tôi không thích học từ tiết này trở đi (*Tiết* \*)
+  - hoặc là người ta có thể yêu cầu "giờ này trở đi" thay vì "tiết này trở đi" (*Tiết* \*\*)
+  - hoặc là tôi thích học từ tiết này đến tiết này - tôi không thích học từ tiết này đến tiết này (*Tiết* \***)
+  - hoặc là tôi muốn lớp học cách nhau khoảng 3 tiết nghỉ trở lên (*Tiết* \****)
+
+---
+
+## Return param với barem tương ứng:
+*(các kiểu return dưới đây chỉ là mẫu)*
+
+- **Buổi:** `{periods: [1, 2, 3, 4], like: true || false}`
+- **Giáo viên:** `{teacher: "ThS. Lê Viết Trương", like: true || false}`
+- **Khu:** `{area: "K" || "V", like: true || false}`
+- **Phòng:** `{room: "A.101", like: true || false}`
+- **Thứ:** `{day: "Thứ hai", like: true || false}`
+- **Môn/buổi**: `{subject_per_session: 1}`
+- **Môn/ngày**: `{subject_per_day: 2}`
+- **Tiết** \*: `{period_onward: 6, like: true || false}`
+- **Tiết** \**: `{hour_onward: 9, unit: "hour", like: true || false}`
+- **Tiết** \*\*\*: `{periods: [2, 3, 4], like: true || false}`
+- **Tiết** \****: `{rest_interval: 2, up_or_down: "up" || "down", like: true || false}`
+
+---
+
+## Barem tự sắp xếp lịch nếu không có ràng buộc đưa vào (Những cái này gọi là ràng buộc cơ bản):
+
+- Không trùng tiết học
+- Khoảng trống giữa các tiết là nhỏ nhất (**Optional**)
+- Không trùng giáo viên giữa các môn (**Optional**)
+
+> **Chú thích:** "Optional" sẽ là cho người dùng tick chọn vào checkbox có thích option mặc định đó hay không. Nếu có thì sẽ được option đó vào để xếp còn không thì không đưa option vào ràng buộc cơ bản.
+
+---
+
+## Những ví dụ yêu cầu khó xử lý param
+
+*(mọi người tìm được prompt nào gây khó tách param thì có thể bỏ vào đây cùng nghiên cứu nhé)*
+
+1. tôi muốn ngày học 2 buổi, mỗi buổi 2 môn 
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 2, subject_per_day: 4, rest_interval: 0, up_or_down: "down", like: true}`
+2. tôi muốn ngày học 2 buổi, mỗi buổi 1 môn
+> `{periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 1, subject_per_day: 2, rest_interval: 2, up_or_down: "up", like: true}`
+3. tôi muốn ngày học 1 buổi, buổi đó chỉ học 1 môn 
+> `periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 1, subject_per_day: 1, rest_interval: 7 (càng lớn càng tốt), up_or_down: "up", like: true`
+4. tôi muốn ngày học 1 buổi, buổi đó chỉ học 2 môn
+> `periods: [1, 2, 3, 4], [6, 7, 8, 9], like: true, subject_per_session: 2, subject_per_day: 2, rest_interval: 0, up_or_down: "down", like: true`
+5. tôi muốn học buổi sáng
+> `{periods: [1, 2, 3, 4], like: true}`

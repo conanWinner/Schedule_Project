@@ -1,0 +1,48 @@
+{
+  "teacher": {
+    "name": "Thầy Lê Viết Trương",
+    "like": false
+  },
+
+  "area": {
+    "value": "K",
+    "like": true
+  },
+
+  "room": {
+    "value": "A.101",
+    "like": true
+  },
+
+  "day": {
+    "value": "Thứ Hai",
+    "like": false
+  },
+
+  "subject_per_session": 1,
+  "subject_per_day": 3,
+
+  "period_onward": {
+    "value": 3,
+    "like": true
+  },
+
+  "hour_onward": {
+    "value": 9,
+    "unit": "hour",
+    "like": true
+  },
+
+  "periods": {
+    "value": [3, 4],
+    "like": true
+  },
+
+  "rest_interval": {
+    "value": 2,
+    "up_or_down": "down",
+    "like": false
+  }
+}
+
+
