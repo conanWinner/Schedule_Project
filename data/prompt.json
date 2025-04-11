@@ -2,6 +2,11 @@
   "defaults": {
     "subject_per_session": 1,
     "subject_per_day": 3,
+    "duration_of_session": {
+      "value": 2,
+      "up_or_down": "down",
+      "like": true
+    },
     "period_onward": {
       "value": 3,
       "like": true
@@ -16,8 +21,8 @@
       "like": true
     },
     "room": [
-      { "value": "A.101", "like": true },
-      { "value": "A.102", "like": true }
+      { "value": "A101", "like": true },
+      { "value": "A102", "like": true }
     ],
     "teacher": [
       { "name": "Mai Lam", "like": true },
@@ -47,9 +52,16 @@
   },
   "periods": [
     {
-      "day": {"value":  "Thứ 2", "like":  true},
+      "day": [
+        {"value":  "Thứ 2", "like":  true}
+      ],
       "period": {"value":  [6, 7, 8, 9], "like":  true},
       "subject_count": {"value":  1, "like":  true},
+      "duration_of_session": {
+        "value": 2,
+        "up_or_down": "down",
+        "like": true
+      },
       "rest_interval": {
         "value": 1,
         "up_or_down": "down",
@@ -59,7 +71,7 @@
         { "name": "Mai Lam", "like": true }
       ],
       "room": [
-        { "value": "A.101", "like": true }
+        { "value": "A101", "like": true }
       ],
       "area": {
         "value": "K",
@@ -85,9 +97,12 @@
         }
     },
     {
-      "day": {"value":  "Thứ 4", "like":  true},
+      "day": [
+        {"value":  "Thứ 4", "like":  true}
+      ],
       "period": {"value":  [1, 2, 3, 4], "like":  true},
       "subject_count": {"value":  2, "like":  true},
+      "duration_of_session": null,
       "rest_interval": {
         "value": 1,
         "up_or_down": "down",
@@ -97,7 +112,7 @@
         { "name": "Phượng", "like": true }
       ],
       "room": [
-        { "value": "A.101", "like": false }
+        { "value": "A101", "like": false }
       ],
       "class": [
         {

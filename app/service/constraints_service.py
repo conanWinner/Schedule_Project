@@ -3,7 +3,7 @@ from deap import base, creator, tools, algorithms
 
 from app.constant.constant_input_test import user_preferences
 from app.constant.schedule_of_classes import schedule_of_classes
-
+from app.model.Class_Info import ClassInfo
 
 # Thiết lập NSGA-II
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -15,8 +15,8 @@ def non_conflict_periods(selected_classes):
     # Không trùng tiết học
     conflicts = 0
     time_slots = set()
-    for _, (teacher, day, periods, area, room) in selected_classes:
-        for p in periods:
+    for _, ClassInfo in selected_classes:
+        for p in ClassInfo.periods:
             slot = (day, p)
             if slot in time_slots:
                 conflicts += 1
@@ -32,10 +32,10 @@ def min_gap_between_classes(selected_classes):
     # khoảng trống giữa các tiết học là nhỏ nhất
     gaps = 0
     day_periods = {}
-    for _, (teacher, day, periods, area, room) in selected_classes:
-        if day not in day_periods:
-            day_periods[day] = []
-        day_periods[day].extend(periods)
+    for _,  ClassInfo in selected_classes:
+        if ClassInfo.day not in day_periods:
+            day_periods[ClassInfo.day] = []
+        day_periods[ClassInfo.day].extend(ClassInfo.periods)
 
     for day in day_periods:
         periods = sorted(set(day_periods[day]))
@@ -49,8 +49,8 @@ def min_gap_between_classes(selected_classes):
 def periods(selected_classes, preference):
     set_preference = set(preference["value"])
     score = 0
-    for _, (_, _, periods, _, _) in selected_classes:
-        set_periods = set(periods)
+    for _, ClassInfo in selected_classes:
+        set_periods = set(ClassInfo.periods)
         same_periods = set_preference & set_periods
         num_same_periods = len(same_periods)
         score += num_same_periods
@@ -62,8 +62,8 @@ def periods(selected_classes, preference):
 def teacher(selected_classes, preference):
     preferred_teachers = preference["name"]
     score = 0
-    for _, (teacher, _, _, _, _) in selected_classes:
-        if teacher in preferred_teachers:
+    for _, ClassInfo in selected_classes:
+        if ClassInfo.teacher in preferred_teachers:
             score += 1
 
     return -score if preference["like"] else score
@@ -71,8 +71,8 @@ def teacher(selected_classes, preference):
 def area(selected_classes, preference):
     preferred_areas = preference["value"]
     score = 0
-    for _, (_, _, _, area, _) in selected_classes:
-        if area in preferred_areas:
+    for _, ClassInfo in selected_classes:
+        if ClassInfo.area in preferred_areas:
             score += 1
 
     return -score if preference["like"] else score
@@ -80,8 +80,8 @@ def area(selected_classes, preference):
 def room(selected_classes, preference):
     preferred_rooms = preference["value"]
     score = 0
-    for _, (_, _, _, _, room) in selected_classes:
-        if room in preferred_rooms:
+    for _, ClassInfo in selected_classes:
+        if ClassInfo.room in preferred_rooms:
             score += 1
 
     return -score if preference["like"] else score
@@ -90,8 +90,8 @@ def room(selected_classes, preference):
 def day(selected_classes, preference):
     preferred_days = preference["value"]
     score = 0
-    for _, (_, day, _, _, _) in selected_classes:
-        if day in preferred_days:
+    for _, ClassInfo in selected_classes:
+        if ClassInfo.day in preferred_days:
             score += 1
 
     return -score if preference["like"] else score
@@ -99,7 +99,7 @@ def day(selected_classes, preference):
 def sub_per_session(selected_classes, preference):
     required_periods = preference["value"]
 
-    counts = [len(periods) for _, (_, _, periods, _, _) in selected_classes]
+    counts = [len(ClassInfo.periods) for _, ClassInfo in selected_classes]
 
     total_mismatch = sum(abs(required_periods - count) for count in counts)
 
@@ -108,8 +108,8 @@ def sub_per_session(selected_classes, preference):
 def sub_per_day(selected_classes, preference):
     subject_per_day = preference["value"]
     sub_counts = {}
-    for _, (_, day, _, _, _) in selected_classes:
-        sub_counts[day] = sub_counts.get(day, 0) + 1
+    for _, ClassInfo in selected_classes:
+        sub_counts[ClassInfo.day] = sub_counts.get(ClassInfo.day, 0) + 1
 
     total_missing = sum(abs(subject_per_day - count) for count in sub_counts.values())
 
@@ -118,7 +118,7 @@ def sub_per_day(selected_classes, preference):
 
 def period_onward(selected_classes, preference):
     min_period = preference["value"]
-    score = sum(1 for _, (_, _, periods, _, _) in selected_classes if min(periods) >= min_period)
+    score = sum(1 for _, ClassInfo in selected_classes if min(ClassInfo.periods) >= min_period)
     return -score if preference["like"] else score
 
 def hour_onward(selected_classes, preference):
@@ -130,8 +130,8 @@ def hour_onward(selected_classes, preference):
 
     min_hour = preference["value"]
     score = sum(
-        1 for _, (_, _, periods, _, _) in selected_classes if
-        period_to_hour(min(periods)) >= min_hour
+        1 for _, ClassInfo in selected_classes if
+        period_to_hour(min(ClassInfo.periods)) >= min_hour
     )
 
     return -score if preference["like"] else score
@@ -140,10 +140,10 @@ def hour_onward(selected_classes, preference):
 def rest_interval(selected_classes, preference):
     gaps = 0
     day_periods = {}
-    for _, (_, day, periods, _, _) in selected_classes:
-        if day not in day_periods:
-            day_periods[day] = []
-        day_periods[day].extend(periods)
+    for _, ClassInfo in selected_classes:
+        if ClassInfo.day not in day_periods:
+            day_periods[ClassInfo.day] = []
+        day_periods[ClassInfo.day].extend(ClassInfo.periods)
 
     for day in day_periods:
         periods = sorted(set(day_periods[day]))
@@ -157,6 +157,32 @@ def rest_interval(selected_classes, preference):
                     gaps += 1
 
     return -gaps if preference['like'] else gaps
+
+def convert_to_classinfo_dict(raw_dict):
+    tiet_raw = raw_dict.get("Tiết", [])
+
+    if isinstance(tiet_raw, str):
+        try:
+            periods = eval(tiet_raw)
+        except:
+            periods = []
+    elif isinstance(tiet_raw, list):
+        periods = tiet_raw
+    else:
+        periods = []
+
+    return {
+        "class_index": raw_dict.get("Lớp", ""),
+        "language": raw_dict.get("Ngôn ngữ", ""),
+        "field": raw_dict.get("Chuyên ngành", ""),
+        "sub_topic": raw_dict.get("Chủ đề phụ", ""),
+        "teacher": raw_dict.get("Giảng viên", ""),
+        "day": raw_dict.get("Thứ", ""),
+        "periods": periods,
+        "area": raw_dict.get("Khu vực", ""),
+        "room": raw_dict.get("Số phòng", ""),
+        "class_size": raw_dict.get("Sỉ số", 0)
+    }
 
 
 CONSTRAINT_FUNCTIONS = {
@@ -174,6 +200,8 @@ CONSTRAINT_FUNCTIONS = {
 
 def evaluate(individual, user_preferences, USER_INPUT, COURSES):
     selected_classes = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(individual)]
+    # Chuyển đổi dict -> ClassInfo
+    selected_classes = [(user_input, ClassInfo(**convert_to_classinfo_dict(class_dict))) for user_input, class_dict in selected_classes]
 
     conflict = non_conflict_periods(selected_classes)
 
