@@ -7,6 +7,10 @@
       "up_or_down": "down",
       "like": true
     },
+    "period": {
+      "value": [2, 3, 4, 5, 6, 7],
+      "like": true
+    },
     "period_onward": {
       "value": 3,
       "like": true
@@ -24,24 +28,22 @@
       { "value": "A101", "like": true },
       { "value": "A102", "like": true }
     ],
-    "teacher": [
-      { "name": "Mai Lam", "like": true },
-      { "name": "Tuấn", "like": false }
-    ],
     "class": [
       {
         "name": "Automat và ngôn ngữ hình thức",
-        "class_group": [
-            {"value":  3, "like":  true},
-            {"value":  4, "like":  true}
-          ]
+        "class_group": [],
+        "teacher": [
+            { "name": "Mai Lam", "like": true },
+            { "name": "Tuấn", "like": false }
+        ]
       },
       {
-        "name": "Lập trình hướng đối tượng",
-        "class_group": [
-            {"value":  8, "like":  true},
-            {"value":  9, "like":  true}
-          ]
+        "name": "",
+        "class_group": [],
+        "teacher": [
+            { "name": "Phượng", "like": true },
+            { "name": "Trọng", "like": true }
+        ]
       }
     ],
     "rest_interval": {
@@ -52,14 +54,14 @@
   },
   "periods": [
     {
-      "day": [
+      "day":
         {"value":  "Thứ 2", "like":  true}
-      ],
+      ,
       "period": {"value":  [6, 7, 8, 9], "like":  true},
       "subject_count": {"value":  1, "like":  true},
       "duration_of_session": {
-        "value": 2,
-        "up_or_down": "down",
+        "value": 3,
+        "up_or_down": "up",
         "like": true
       },
       "rest_interval": {
@@ -67,9 +69,6 @@
         "up_or_down": "down",
         "like": true
       },
-      "teacher": [
-        { "name": "Mai Lam", "like": true }
-      ],
       "room": [
         { "value": "A101", "like": true }
       ],
@@ -83,23 +82,26 @@
           "class_group": [
             {"value":  2, "like":  true},
             {"value":  4, "like":  true}
+          ],
+          "teacher": [
+            { "name": "Kim Tuyến", "like": true }
           ]
         }
       ],
-        "period_onward": {
-          "value": 8,
-          "like": true
-        },
-        "hour_onward": {
-          "value": 15,
-          "unit": "hour",
-          "like": true
-        }
+      "period_onward": {
+        "value": 8,
+        "like": true
+      },
+      "hour_onward": {
+        "value": 15,
+        "unit": "hour",
+        "like": true
+      }
     },
     {
-      "day": [
+      "day":
         {"value":  "Thứ 4", "like":  true}
-      ],
+      ,
       "period": {"value":  [1, 2, 3, 4], "like":  true},
       "subject_count": {"value":  2, "like":  true},
       "duration_of_session": null,
@@ -108,9 +110,6 @@
         "up_or_down": "down",
         "like": true
       },
-      "teacher": [
-        { "name": "Phượng", "like": true }
-      ],
       "room": [
         { "value": "A101", "like": false }
       ],
@@ -120,6 +119,9 @@
           "class_group": [
             {"value":  2, "like":  true},
             {"value":  4, "like":  true}
+          ],
+          "teacher": [
+            { "name": "Phượng", "like": true }
           ]
         }
       ],
@@ -132,3 +134,7 @@
     }
   ]
 }
+
+
+
+

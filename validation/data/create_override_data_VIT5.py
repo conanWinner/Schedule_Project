@@ -1,14 +1,25 @@
 import random
+from collections import defaultdict
+
 import pandas as pd
+
+data_df_subjects_teacher = pd.read_excel("./output/hoc_phan_giang_vien_khong_trung.xlsx")
+data_df_rooms = pd.read_excel("./output/phong_khong_trung_lap.xlsx")
+
 # Danh sách dữ liệu để random
+subjects = data_df_subjects_teacher['Tên học phần'].dropna().unique().tolist()
+teachers = data_df_subjects_teacher['Giảng viên'].dropna().unique().tolist()
+rooms = data_df_rooms['Số phòng'].dropna().unique().tolist()
 days = ["thứ 2", "thứ 3", "thứ 4", "thứ 5", "thứ 6", " thứ 7"]
 session = ["buổi sáng", "buổi chiều"]
-subjects = ["Toán rời rạc", "Giải tích", "Lập trình hướng đối tượng", "Xác suất thống kê", "Cấu trúc dữ liệu", "Cơ sở dữ liệu", "Chuyên đề 1", "Công nghệ Web"]
-teachers = ["cô Mai Lam", "thầy Hùng", "thầy Nam", "cô Trang", "thầy Long", "cô Hạnh", "Ths. Lê Viết Trương"]
-rooms = ["A101", "B202", "C303", "A404", "B505", "C205"]
-areas = ["K", "V", "L", "M", "N"]
+areas = ["K", "V"]
 connectors = [", ", ". ", " và ", " hoặc ", " "]
+subject_teacher_pairs = data_df_subjects_teacher[['Tên học phần', 'Giảng viên']].dropna().drop_duplicates().values.tolist()
 
+# Tạo ánh xạ: môn học → danh sách giảng viên
+subject_to_teachers = defaultdict(list)
+for subject, teacher in subject_teacher_pairs:
+    subject_to_teachers[subject].append(teacher)
 # Mẫu câu đa dạng
 sentence_templates = [
     lambda: f"Tôi thích học sáng {random.choice(days)} với {random.randint(1,2)} môn là hợp lý",
@@ -37,7 +48,10 @@ sentence_templates = [
     lambda: f"Tôi muốn học từ tiết {random.randint(3,5)} trở đi là hợp lý",
     lambda: f"Tôi không muốn học từ tiết 1 vì tôi không phải người dậy sớm",
     lambda: f"Tôi thích lịch học không quá dày trong ngày, tối đa {random.randint(2,3)} môn",
-    lambda: f"Tôi muốn học môn {random.choice(subjects)} với {random.choice(teachers)} ở phòng {random.choice(areas)}.{random.choice(rooms)} vào ngày {random.choice(days)}",
+    lambda: (lambda subject: (
+        (lambda t1, t2: f"Tôi muốn học môn {subject} với {t1}" + (f" hoặc {t2}" if t2 else ""))
+        (*get_two_teachers_for_subject(subject))
+    ))(random.choice(list(subject_to_teachers.keys()))),
     lambda: f"Tôi thích học sáng {random.choice(days)} miễn là có thời gian nghỉ giữa các môn",
     lambda: f"Tôi tránh học với {random.choice(teachers)} vào {random.choice(days)}",
     lambda: f"Tôi chỉ muốn học ở phòng {random.choice(areas)}.{random.choice(rooms)} vào ngày {random.choice(days)} nếu có đủ chỗ ngồi",
@@ -46,7 +60,7 @@ sentence_templates = [
     lambda: f"Tôi thích học từ tiết {random.randint(2,4)} đến tiết {random.randint(5,6)} ngày {random.choice(days)}",
     lambda: f"Tôi muốn học môn {random.choice(subjects)} vào thứ {random.randint(2,7)} và có nghỉ giữa giờ",
     lambda: f"Tôi chỉ học buổi sáng trong tuần, không học buổi chiều",
-    lambda: f"Tôi thích học với {random.choice(teachers)} nếu môn đó là {random.choice(subjects)}",
+    lambda: (lambda subject, teacher: f"Tôi muốn học {subject} vào sáng {random.choice(days)} nếu có {teacher}")(*random.choice(subject_teacher_pairs)),
     lambda: f"Tôi muốn học môn {random.choice(subjects)} sáng {random.choice(days)}, tránh chiều",
     lambda: f"Tôi không muốn học môn {random.choice(subjects)} vào thứ {random.randint(5,7)}",
     lambda: f"Tôi thích học ở khu {random.choice(areas)} ngày {random.choice(days)} nếu được chọn",
@@ -62,10 +76,28 @@ sentence_templates = [
     lambda: f"Tôi muốn lịch học nhẹ vào {random.choice(days)}, tối đa {random.randint(1,2)} môn"
 ]
 
+def get_two_teachers_for_subject(subject):
+    teachers = list(set(subject_to_teachers[subject]))  # loại trùng
+    if len(teachers) == 0:
+        return ("[Không rõ]", None)
+    elif len(teachers) == 1:
+        return (teachers[0], None)
+    else:
+        t1 = random.choice(teachers)
+        t2 = random.choice([t for t in teachers if t != t1])
+        return (t1, t2)
+
+
+#
+# N8N CHAT => LÀM NUỘT PROMPT => GEMINI => JSON
+
+# LÀM NUỘT PROMPT , JSON => VIT5
+# 1500 + 500
+
 # Tạo 4000 prompt, không lặp lại câu trong cùng prompt
 prompts = []
-for _ in range(4000):
-    num_sentences = random.randint(1, 8)
+for _ in range(2000):
+    num_sentences = random.randint(1, 5)
     used_sentences = set()
     unique_sentences = []
 
@@ -87,8 +119,8 @@ for _ in range(4000):
     prompts.append(prompt)
 
 # In thử 10 prompt đầu
-for i, p in enumerate(prompts[:10], 1):
-    print(f"{i:02d}. {p}")
+# for i, p in enumerate(prompts[:10], 1):
+#     print(f"{i:02d}. {p}")
 
 # (Tùy chọn) Ghi ra file CSV
 pd.DataFrame({'Kết quả': prompts}).to_excel("./output/Final_Override_Dataset_VIT5.xlsx", index=False)
