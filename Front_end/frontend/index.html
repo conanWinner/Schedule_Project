@@ -1,0 +1,37 @@
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chọn Môn Học</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>HÃY CHO CHÚNG TÔI BIẾT:</h2>
+
+    <label for="subject">Môn Học</label>
+    <input type="text" id="subject" placeholder="Nhập tên môn học">
+    <ul id="suggestionBox"></ul>
+
+    <table id="subjectTable">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên Môn Học</th>
+          <th>Không học</th>
+          <th>Muốn học</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="note">
+      <label for="note-text">CHÚ THÍCH THÊM</label>
+      <textarea id="note-text" placeholder="VD: Muốn học buổi sáng, tiết 1,2 hoặc thêm môn Giải tích..."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submitForm()">Hãy lập tkb cho tôi</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

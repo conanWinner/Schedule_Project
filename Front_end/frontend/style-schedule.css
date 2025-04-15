@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .timetable-container {
+    margin-bottom: 60px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #6b2b52;
+    margin-bottom: 10px;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .info-block {
+    display: flex;
+    align-items: center;
+  }
+  
+  .info-block label {
+    font-weight: bold;
+    width: 100px;
+  }
+  
+  .info-block input {
+    flex: 1;
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    table-layout: fixed;
+  }
+  
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    width: 14.28%;
+  }
+  
+  th {
+    background-color: #6b2b52;
+    color: white;
+  }
+  
+  .period-col {
+    background-color: #fce4ec;
+    font-weight: bold;
+    width: 100px;
+  }
+  
+  .filled {
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  
+  .yellow {
+    background-color: #fff9c4;
+  }
+  
+  .blue {
+    background-color: #b3e5fc;
+  }
+  
+  .green {
+    background-color: #dcedc8;
+  }
+  
+  .purple {
+    background-color: #e1bee7;
+  }
+  
+  .filled:hover {
+    background-color: #ffd54f !important;
+  }
+  
