@@ -6,3 +6,4 @@ pandas
 numpy
 tqdm
 huggingface-hub
+sentencepiece

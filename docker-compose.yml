@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  vit5-service:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - MODEL_PATH=conanWinner/model_scheduler
+      - PORT=5000
+      - HOST=0.0.0.0
+      - DEBUG=False
+      - USE_FP16=True
+    restart: unless-stopped
