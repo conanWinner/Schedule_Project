@@ -1,0 +1,8 @@
+flask
+flask-cors
+torch
+transformers
+pandas
+numpy
+tqdm
+huggingface-hub
