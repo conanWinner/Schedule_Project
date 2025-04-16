@@ -16,10 +16,9 @@ def search_recommend():
         # Regex pattern để tìm gần đúng (case-insensitive)
         pattern = re.compile(f".*{re.escape(query_text)}.*", re.IGNORECASE)
 
-        # Truy cập collection từ current_app
         collection = current_app.db["ly_courses"]
 
-        # Tìm kiếm theo course_name hoặc sub_topic
+
         query = {
             "$or": [
                 {"course_name": pattern},
@@ -27,7 +26,7 @@ def search_recommend():
             ]
         }
 
-        cursor = collection.find(query).limit(10)
+        cursor = collection.find(query)
 
         results = []
         for doc in cursor:

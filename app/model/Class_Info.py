@@ -3,6 +3,7 @@ from typing import List
 
 @dataclass
 class ClassInfo:
+    course_name: str
     class_index: str
     language: str
     field: str

@@ -1,10 +1,12 @@
 import random
+import re
+import unicodedata
 from collections import defaultdict
 
 from deap import base, creator, tools, algorithms
 
 from app.constant.constant_input_test import USER_PREFERENCES, USER_INPUT, COURSES
-from app.constant.schedule_of_classes import SCHEDULE_OF_CLASSES
+from app.constant.constant_of_schedule import SCHEDULE_OF_CLASSES
 from app.model.Class_Info import ClassInfo
 
 NUM_COURSES = len(USER_INPUT)
@@ -105,15 +107,31 @@ def day(selected_classes, preference):
     if not preference or "value" not in preference:
         return 0
 
-    preferred_day = preference["value"].lower()
+    preferred_day = normalize_day(preference["value"])
     score = 0
     for _, ClassInfo in selected_classes:
-        day_lower = ClassInfo.day.lower()
-        if day_lower == preferred_day:
+        class_day = normalize_day(ClassInfo.day)
+        if class_day == preferred_day:
             score += 1
 
     return -score * PRIORITY_WEIGHTS["day"] if preference.get('like', False) else score
 
+
+def normalize_day(day_str):
+    nfkd_form = unicodedata.normalize('NFKD', day_str)
+    without_diacritics = "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    day_clean = without_diacritics.lower().replace(" ", "")
+
+    # Chuẩn hóa thành dạng "thu2", "thu3", ...
+    day_clean = re.sub(r"thu(?:hai|2)", "thu2", day_clean)
+    day_clean = re.sub(r"thu(?:ba|3)", "thu3", day_clean)
+    day_clean = re.sub(r"thu(?:tu|4)", "thu4", day_clean)
+    day_clean = re.sub(r"thu(?:nam|5)", "thu5", day_clean)
+    day_clean = re.sub(r"thu(?:sau|6)", "thu6", day_clean)
+    day_clean = re.sub(r"thu(?:bay|7)", "thu7", day_clean)
+    day_clean = re.sub(r"chunhat|chunhật|chủnhật|cn", "chunhat", day_clean)
+
+    return day_clean
 
 def duration_of_session(selected_classes, preference):
     """Check if the duration of sessions matches preferences"""
