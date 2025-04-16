@@ -2,7 +2,9 @@ import random
 import re
 import unicodedata
 from collections import defaultdict
+from dataclasses import asdict
 
+import pandas as pd
 from deap import base, creator, tools, algorithms
 
 from app.constant.constant_input_test import USER_PREFERENCES
@@ -400,11 +402,17 @@ CONSTRAINT_FUNCTIONS = {
 
 def evaluate(individual, USER_PREFERENCES, USER_INPUT, COURSES):
     selected_classes = [(USER_INPUT[i], COURSES[USER_INPUT[i]][idx]) for i, idx in enumerate(individual)]
-
+    # Debug output
+    print("\n=== EVALUATING SCHEDULE ===")
+    print("Selected classes:")
+    for subject, class_info in selected_classes:
+        print(
+            f"  {subject} - {class_info.class_index} - {class_info.teacher} - {class_info.day} - Periods: {class_info.periods}")
 
     # Handle hard constraints
     conflict = non_conflict_periods(selected_classes)
     if conflict > 0:
+        print(f"INVALID SCHEDULE: {conflict} conflicts detected")
         return (float('inf'),)  # Invalid schedule due to conflicts
 
 
@@ -412,25 +420,31 @@ def evaluate(individual, USER_PREFERENCES, USER_INPUT, COURSES):
     total_score = 0
     processed_constraints = {(ui, ci.day): set() for ui, ci in selected_classes}
 
-
+    print("\nProcessing period-specific constraints:")
     for i, period_pref in enumerate(USER_PREFERENCES.get("periods", [])):
+        print(f"  Period preference #{i + 1}:")
         day_info = period_pref.get("day", {})
         day_value = day_info.get("value") if day_info else None
+
+        print(f"    Day: {day_value or 'All days'}")
 
 
         if day_value is None or day_value == "Cả tuần":
             day_classes = selected_classes  # Apply to all classes
         else:
-            day_classes = [(ui, ci) for ui, ci in selected_classes if ci.day == day_value]
+            day_classes = [(ui, ci) for ui, ci in selected_classes if normalize_day(ci.day) == normalize_day(day_value)]
 
         if not day_classes:
+            print("    No matching classes for this day")
             continue
 
         # Apply specific constraints for this period
         for key, preference in period_pref.items():
             if key in CONSTRAINT_FUNCTIONS and preference is not None and key != "day":
+                print(f"    Applying period-specific constraint: {key}")
                 constraint_score = CONSTRAINT_FUNCTIONS[key](day_classes, preference) * 2
                 total_score += constraint_score
+                print(f"      Score contribution: {constraint_score}")
                 # Kiểm tra xem giá trị của preference có phải là None hoặc mảng rỗng không
                 if preference is None or (isinstance(preference, list) and len(preference) == 0):
                     # Nếu preference là None hoặc mảng rỗng, không làm gì cả
@@ -443,7 +457,8 @@ def evaluate(individual, USER_PREFERENCES, USER_INPUT, COURSES):
                         processed_constraints[(ui, ci.day)].add(key)
 
 
-    defaults = USER_PREFERENCES.get("defaults", {})
+    print("\nProcessing default constraints:")
+    defaults = USER_PREFERENCES.get("defaults") or {}
     for key, preference in defaults.items():
         if key in CONSTRAINT_FUNCTIONS and preference is not None:
             # Only apply default constraints to classes that don't have a specific period override
@@ -453,12 +468,30 @@ def evaluate(individual, USER_PREFERENCES, USER_INPUT, COURSES):
                     unprocessed_classes.append((ui, ci))
 
             if unprocessed_classes:
+                print(f"Applying default constraint '{key}' to {len(unprocessed_classes)} unprocessed classes: {unprocessed_classes}")
                 constraint_score = CONSTRAINT_FUNCTIONS[key](unprocessed_classes, preference)
                 total_score += constraint_score
+                print(f"    Score contribution: {constraint_score}")
+            else:
+                print(f"  Skipping default constraint '{key}' - all classes already processed")
 
+    print(f"\nTotal fitness score: {total_score}")
 
     return (total_score,)
 
+def sanitize_classinfo(class_info):
+    raw_dict = asdict(class_info)
+    result = {}
+    for k, v in raw_dict.items():
+        # Nếu là list (như periods), giữ nguyên
+        if isinstance(v, list):
+            result[k] = v
+        # Nếu là NaN thì thay bằng chuỗi rỗng
+        elif pd.isna(v):
+            result[k] = ""
+        else:
+            result[k] = v
+    return result
 toolbox = base.Toolbox()
 
 
@@ -497,7 +530,10 @@ def run_nsga_ii(courses_data, prompt):
 
     results = []
     for ind in top_5:
-        schedule = [(USER_INPUT[i], courses_data[USER_INPUT[i]][idx]) for i, idx in enumerate(ind)]
+        schedule = [
+            (USER_INPUT[i], sanitize_classinfo(courses_data[USER_INPUT[i]][idx]))
+            for i, idx in enumerate(ind)
+        ]
         results.append({
             "schedule": schedule,
             "score": abs(ind.fitness.values[0])

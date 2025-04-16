@@ -30,9 +30,17 @@ def search_recommend():
 
         results = []
         for doc in cursor:
+            course_name = doc.get("course_name", "")
+            sub_topic = doc.get("sub_topic", "")
+
+            # Đảm bảo cả hai đều là chuỗi hợp lệ
+            course_name = str(course_name) if course_name is not None else ""
+            sub_topic = str(
+                sub_topic) if sub_topic is not None and sub_topic == sub_topic else ""  # sub_topic == sub_topic kiểm tra NaN
+
             result = {
-                "course_name": doc.get("course_name", ""),
-                "sub_topic": doc.get("sub_topic", "") or ""
+                "course_name": course_name.strip(),
+                "sub_topic": sub_topic.strip()
             }
             results.append(result)
 
