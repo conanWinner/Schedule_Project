@@ -1,96 +1,47 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import os
-from app.config.database_configuration import get_database
-from app.config.embedding_model import load_model
-from app.service.constraints_service import run_nsga_ii
+from flask import Blueprint, request, jsonify, current_app
+import re
 
-app = Flask(__name__)
-CORS(app)
+search_bp = Blueprint("search", __name__)
 
-# Gọi hàm để lấy database
-db = get_database()
-collection = db["ly_courses"]
-# Load mô hình
-model = load_model()
+@search_bp.route("/search-recommend", methods=["POST"])
+def search_recommend():
+    try:
+        data = request.get_json()
 
-@app.route("/search", methods=["POST"])
-def search():
-    data = request.json
-    queries = data.get("queries", [])  # Nhận danh sách nhiều môn học
-    top_k = data.get("top_k", 20)
+        if not data or 'query' not in data:
+            return jsonify({"error": "Missing 'query' parameter"}), 400
 
-    if not queries:
-        return jsonify({"error": "Missing queries"}), 400
+        query_text = data['query']
 
-    courses_data = {}
+        # Regex pattern để tìm gần đúng (case-insensitive)
+        pattern = re.compile(f".*{re.escape(query_text)}.*", re.IGNORECASE)
 
-    for query in queries:
-        query_vector = model.encode(query).tolist()
+        collection = current_app.db["ly_courses"]
 
-        pipeline = [
-            {
-                "$vectorSearch": {
-                    "index": "vector_index",
-                    "path": "embedding",
-                    "queryVector": query_vector,
-                    "numCandidates": 1000,
-                    "limit": top_k
-                }
-            },
-            {"$unset": "embedding"},
-            {
-                "$project": {
-                    "_id": 0,
-                    "Tên học phần": 1,
-                    "Giảng viên": 1,
-                    "Thứ": 1,
-                    "Tiết": 1,
-                    "Khu vực": 1,
-                    "Số phòng": 1,
-                    "score": {"$meta": "vectorSearchScore"}
-                }
+
+        query = {
+            "$or": [
+                {"course_name": pattern},
+                {"sub_topic": pattern}
+            ]
+        }
+
+        cursor = collection.find(query)
+
+        results = []
+        for doc in cursor:
+            result = {
+                "course_name": doc.get("course_name", ""),
+                "sub_topic": doc.get("sub_topic", "") or ""
             }
-        ]
+            results.append(result)
 
-        results = list(collection.aggregate(pipeline))
-        # print(pipeline)
-        print("Results:", results)
+        response = {
+            "query": query_text,
+            "results": results
+        }
 
-        # Định dạng kết quả - giữ lại tất cả các lớp khác nhau
-        formatted_results = []
+        return jsonify(response)
 
-        for item in results:
-            # Chuyển đổi chuỗi Tiết thành list số nếu cần
-            try:
-                tiets = eval(item["Tiết"]) if isinstance(item["Tiết"], str) else item["Tiết"]
-                # import ast
-                # tiets = ast.literal_eval(item["Tiết"]) if isinstance(item["Tiết"], str) else item["Tiết"]
-            except:
-                tiets = []
-
-            course_info = (
-                item["Giảng viên"],
-                item["Thứ"],
-                tiets,
-                item["Khu vực"],
-                item["Số phòng"]
-            )
-            formatted_results.append(course_info)
-
-        if formatted_results:
-            courses_data[query] = formatted_results
-        else:
-            courses_data[query] = [("Không tìm thấy", "", [], "", "")]
-
-    # ⚙️ Gọi hàm NSGA-II
-    schedules = run_nsga_ii(courses_data)
-
-    return jsonify({
-            "schedules": schedules,
-            "message": "Đã sắp xếp thành công"
-    })
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
+    except Exception as e:
+        return jsonify({"error": "An error occurred while processing your request"}), 500

@@ -1,0 +1,13 @@
+{
+  "query": "du lieu",
+  "results": [
+    {
+      "course_name": "Phân tích dữ liệu",
+      "sub_topic": "Pandas, trực quan hóa với Matplotlib"
+    },
+    {
+      "course_name": "Cơ sở dữ liệu",
+      "sub_topic": "SQL và thiết kế cơ sở dữ liệu"
+    }
+  ]
+}
