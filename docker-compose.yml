@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  schedule_backend:
+    build: .
+    container_name: schedule_be_nsgaii
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/code
+    restart: unless-stopped

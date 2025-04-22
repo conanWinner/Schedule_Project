@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from app.config.database_configuration import get_database
 from app.config.embedding_model import load_model
 
-# Tải các biến môi trường từ file .env
+# Tải các biến môi trường từ file ..env
 load_dotenv()
 
 # Kết nối tới MongoDB

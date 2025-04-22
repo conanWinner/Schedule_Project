@@ -18,4 +18,4 @@ app.register_blueprint(search_bp, url_prefix='/api')
 app.register_blueprint(list_all_bp, url_prefix="/api")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=8001, debug=True)
