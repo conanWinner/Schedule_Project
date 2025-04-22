@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thời Khóa Biểu - Test</title>
+  <style>
+    /* Nhúng CSS ở đây */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .timetable-container {
+      margin-bottom: 60px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #3c763d;
+      margin-bottom: 10px;
+    }
+    
+    .score-display {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      font-size: 20px;
+      color: red;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .info-block {
+      display: flex;
+      align-items: center;
+    }
+    
+    .info-block label {
+      font-weight: bold;
+      width: 100px;
+    }
+    
+    .info-block input {
+      flex: 1;
+      padding: 6px;
+      font-size: 16px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      table-layout: fixed;
+    }
+    
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      width: 14.28%;
+      vertical-align: middle;
+    }
+    
+    th {
+      background-color: #efefef;
+      color: #4a6d9b;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .period-col {
+      background-color: #dff0d8;
+      font-weight: bold;
+      width: 100px;
+    }
+    
+    .filled {
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+      color: white;
+    }
+    
+    /* Màu sắc mới cho các học phần khác nhau */
+    .darkgreen {
+      background-color: #2d5d2a;
+    }
+    
+    .darkbrown {
+      background-color: #5d3c2a;
+    }
+    
+    .navyblue {
+      background-color: #2d3d5d;
+    }
+    
+    .darkblue {
+      background-color: #2a3b5d;
+    }
+    
+    .darkred {
+      background-color: #5d2a2a;
+    }
+    
+    .filled:hover {
+      filter: brightness(120%);
+    }
+    
+    /* Định dạng phòng học */
+    .filled small {
+      display: block;
+      font-size: 12px;
+      margin-top: 4px;
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper"></div>
+
+  <script>
+    // Function để render thời khóa biểu
+    function renderSchedules (schedules) {
+      const days = [
+      'Thứ Hai',
+      'Thứ Ba',
+      'Thứ Tư',
+      'Thứ Năm',
+      'Thứ Sáu',
+      'Thứ Bảy'
+      ]
+
+      const periodLabels = [
+        'Tiết 1: 07h30',
+        'Tiết 2: 08h30',
+        'Tiết 3: 09h30',
+        'Tiết 4: 10h30',
+        'Tiết 5: 11h30',
+        'Tiết 6: 13h00',
+        'Tiết 7: 14h00',
+        'Tiết 8: 15h00',
+        'Tiết 9: 16h00',
+        'Tiết 10: 17h00'
+      ]
+
+      // Các màu cho các học phần khác nhau
+      const courseColors = [
+        'darkgreen',    // Xanh lục đậm
+        'darkbrown',    // Nâu đậm
+        'navyblue',     // Xanh navy
+        'darkblue',     // Xanh dương đậm
+        'darkred'       // Đỏ đậm
+      ]
+
+      const wrapper = document.getElementById('wrapper')
+      wrapper.innerHTML = ''
+
+      schedules.forEach((scheduleObj, index) => {
+        const timetableData = scheduleObj.schedule
+        
+        // Tạo mapping màu cho từng học phần
+        const courseColorMap = {}
+        let colorIndex = 0
+        timetableData.forEach(courseData => {
+          const courseName = courseData[0]
+          if (!courseColorMap[courseName]) {
+            courseColorMap[courseName] = courseColors[colorIndex % courseColors.length]
+            colorIndex++
+          }
+        })
+
+        const container = document.createElement('div')
+        container.className = 'timetable-container'
+        container.innerHTML = `
+            <h1>THỜI KHÓA BIỂU ${index + 1}</h1>
+            <div class="score-display">Điểm: ${scheduleObj.score}</div>
+            <div class="info-grid">
+              <div class="info-block"><label>Tên HP:</label><input id="subject-name-${index}" readonly></div>
+              <div class="info-block"><label>Giáo viên:</label><input id="subject-teacher-${index}" readonly></div>
+              <div class="info-block"><label>Thời gian:</label><input id="subject-time-${index}" readonly></div>
+              <div class="info-block"><label>Phòng:</label><input id="subject-room-${index}" readonly></div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tiết</th>
+                  ${days.map(day => `<th>${day}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody id="timetable-body-${index}"></tbody>
+            </table>
+          `
+        wrapper.appendChild(container)
+
+        const tbody = container.querySelector(`#timetable-body-${index}`)
+        const inputs = {
+          subject: container.querySelector(`#subject-name-${index}`),
+          teacher: container.querySelector(`#subject-teacher-${index}`),
+          time: container.querySelector(`#subject-time-${index}`),
+          room: container.querySelector(`#subject-room-${index}`)
+        }
+
+        const rendered = Array.from({ length: 10 }, () =>
+          Object.fromEntries(days.map(d => [d, false]))
+        )
+        // [
+        //   { Monday: false, Tuesday: false, ..., Saturday: false },
+        //   { Monday: false, Tuesday: false, ..., Saturday: false },
+        //   ...
+        //   (10 object như vậy)
+        // ]
+
+
+        for (let i = 1; i <= 10; i++) {
+          const row = document.createElement('tr')
+          const periodCell = document.createElement('td')
+          periodCell.textContent = periodLabels[i - 1]
+          periodCell.className = 'period-col'
+          row.appendChild(periodCell)
+
+          days.forEach(day => {
+            if (rendered[i - 1][day]) return
+            const cell = document.createElement('td')
+
+
+            for (const courseData of timetableData) {
+              // courseData bây giờ là một Object hoc lop phan
+              const courseName = courseData[0]
+              const info = courseData[1]
+
+              
+              if (info.day !== day) continue
+
+              if (info.periods.includes(i)) {
+                const isStart = i === Math.min(...info.periods)
+                const rowspan = info.periods.length
+
+                if (isStart) {
+                  // Thêm nội dung và định dạng phòng học
+                  const roomCode = `${info.area}.${info.room}`
+                  const subTopic = info.sub_topic?.trim() ?? ''
+
+                  const courseInfo = `${courseName} (${info.class_index})${subTopic ? '_' + subTopic : ''}`
+
+                  cell.innerHTML = `
+                    ${courseInfo}<br>
+                    <small>${roomCode}</small>
+                  `
+                  cell.classList.add('filled')
+                  
+                  // Sử dụng class màu tương ứng với khóa học
+                  cell.classList.add(courseColorMap[courseName])
+                  
+                  cell.setAttribute('rowspan', rowspan)
+
+                  // Thêm thông tin chi tiết cho hộp thông tin khi di chuột vào
+                  cell.addEventListener('mouseover', () => {
+                    inputs.subject.value = courseInfo
+                    inputs.teacher.value = info.teacher
+                    inputs.time.value = `${
+                      periodLabels[info.periods[0] - 1].split(': ')[1]
+                    } - ${
+                      periodLabels[info.periods[info.periods.length - 1] - 1].split(
+                        ': '
+                      )[1]
+                    }`
+                    inputs.room.value = roomCode
+
+                    // Hiển thị thông tin bổ sung nếu có
+                    // if (info.sub_topic) {
+                    //   inputs.subject.value += ` (${info.sub_topic})`
+                    // }
+                  })
+
+                  cell.addEventListener('mouseleave', () => {
+                    inputs.subject.value = ''
+                    inputs.teacher.value = ''
+                    inputs.time.value = ''
+                    inputs.room.value = ''
+                  })
+
+                  row.appendChild(cell)
+
+                  for (let r = 0; r < rowspan; r++) {
+                    if (i - 1 + r < 10) rendered[i - 1 + r][day] = true
+                  }
+                }
+                return
+              }
+            }
+
+            if (!cell.hasAttribute('rowspan')) row.appendChild(cell)
+          })
+
+          tbody.appendChild(row)
+        }
+      })
+    }
+
+    // Mock data
+    const mockScheduleData = {
+      "schedules": [
+        {
+          "score": 92.5,
+          "schedule": [
+            [
+              "Triết học Mác - Lênin (2)",
+              {
+                "day": "Thứ Tư",
+                "periods": [1, 2, 3, 4],
+                "teacher": "Nguyễn Văn A",
+                "area": "K",
+                "room": "C205",
+                "sub_topic": "Nhóm 01"
+              }
+            ],
+            [
+              "Học máy (8)", 
+              {
+                "day": "Thứ Năm",
+                "periods": [1, 2, 3, 4],
+                "class_index": "2",
+                "teacher": "Trần Thị B",
+                "area": "V",
+                "room": "A401",
+                "sub_topic": ""
+              }
+            ],
+            [
+              "Chương trình dịch (2)",
+              {
+                "day": "Thứ Hai",
+                "periods": [6, 7],
+                "teacher": "Lê Văn C",
+                "area": "K",
+                "room": "A205",
+                "sub_topic": "HỌC BÙ"
+              }
+            ],
+            [
+              "Tiếng Anh nâng cao 4 (2)",
+              {
+                "day": "Thứ Hai",
+                "periods": [8, 9],
+                "teacher": "John Smith",
+                "area": "K",
+                "room": "B102",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Pháp luật đại cương (8)",
+              {
+                "day": "Thứ Tư",
+                "periods": [8, 9],
+                "teacher": "Hoàng Thị D",
+                "area": "K",
+                "room": "C106",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Chương trình dịch (2)",
+              {
+                "day": "Thứ Năm",
+                "periods": [6, 7],
+                "teacher": "Lê Văn C",
+                "area": "K",
+                "room": "A212",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Chuyên đề 2 (IT)",
+              {
+                "day": "Thứ Bảy",
+                "periods": [6, 7, 8],
+                "class_index": "2",
+                "teacher": "Đỗ Thị E",
+                "area": "K",
+                "room": "A101",
+                "sub_topic": null
+              }
+            ]
+          ]
+        },
+        {
+          "score": 87.3,
+          "schedule": [
+            [
+              "Triết học Mác - Lênin (2)",
+              {
+                "day": "Thứ Ba",
+                "periods": [1, 2, 3, 4],
+                "teacher": "Nguyễn Văn A",
+                "area": "K",
+                "room": "D205",
+                "sub_topic": "Nhóm 02"
+              }
+            ],
+            [
+              "Học máy (8)", 
+              {
+                "day": "Thứ Tư",
+                "periods": [1, 2, 3, 4],
+                "teacher": "Trần Thị B",
+                "area": "V",
+                "room": "A401",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Chương trình dịch (2)",
+              {
+                "day": "Thứ Hai",
+                "periods": [6, 7],
+                "teacher": "Lê Văn C",
+                "area": "K",
+                "room": "A205",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Tiếng Anh nâng cao 4 (2)",
+              {
+                "day": "Thứ Năm",
+                "periods": [8, 9],
+                "teacher": "John Smith",
+                "area": "K",
+                "room": "B102",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Pháp luật đại cương (8)",
+              {
+                "day": "Thứ Bảy",
+                "periods": [3, 4],
+                "teacher": "Hoàng Thị D",
+                "area": "K",
+                "room": "C106",
+                "sub_topic": null
+              }
+            ],
+            [
+              "Chuyên đề 2 (IT)",
+              {
+                "day": "Thứ Sáu",
+                "periods": [6, 7, 8],
+                "teacher": "Đỗ Thị E",
+                "area": "K",
+                "room": "A101",
+                "sub_topic": "(6)_Ite_Low code, No code & Automation"
+              }
+            ]
+          ]
+        }
+      ]
+    };
+
+    // Render thời khóa biểu khi trang đã tải xong
+    document.addEventListener('DOMContentLoaded', function() {
+      renderSchedules(mockScheduleData.schedules);
+    });
+  </script>
+</body>
+</html>

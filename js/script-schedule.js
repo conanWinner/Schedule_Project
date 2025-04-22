@@ -14,7 +14,9 @@ const payload = JSON.parse(localStorage.getItem('schedule_payload'))
 if (!payload) {
   loadingEl.remove()
   alert('⚠️ Không có dữ liệu truy vấn. Quay lại trang trước.')
+   window.location.href = 'index.html'
 } else {
+  // http://20.29.23.53:5000/api/convert
   fetch('http://127.0.0.1:5001/api/convert', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -34,21 +36,14 @@ if (!payload) {
 
 function renderSchedules (schedules) {
   const days = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
+    'Thứ Hai',
+    'Thứ Ba',
+    'Thứ Tư',
+    'Thứ Năm',
+    'Thứ Sáu',
+    'Thứ Bảy'
   ]
-  const dayMapping = {
-    'Thứ Hai': 'Monday',
-    'Thứ Ba': 'Tuesday',
-    'Thứ Tư': 'Wednesday',
-    'Thứ Năm': 'Thursday',
-    'Thứ Sáu': 'Friday',
-    'Thứ Bảy': 'Saturday'
-  }
+
   const periodLabels = [
     'Tiết 1: 07h30',
     'Tiết 2: 08h30',
@@ -62,11 +57,31 @@ function renderSchedules (schedules) {
     'Tiết 10: 17h00'
   ]
 
+  // Các màu cho các học phần khác nhau
+  const courseColors = [
+    'darkgreen',    // Xanh lục đậm
+    'darkbrown',    // Nâu đậm
+    'navyblue',     // Xanh navy
+    'darkblue',     // Xanh dương đậm
+    'darkred'       // Đỏ đậm
+  ]
+
   const wrapper = document.getElementById('wrapper')
   wrapper.innerHTML = ''
 
   schedules.forEach((scheduleObj, index) => {
     const timetableData = scheduleObj.schedule
+    
+    // Tạo mapping màu cho từng học phần
+    const courseColorMap = {}
+    let colorIndex = 0
+    timetableData.forEach(courseData => {
+      const courseName = courseData[0]
+      if (!courseColorMap[courseName]) {
+        courseColorMap[courseName] = courseColors[colorIndex % courseColors.length]
+        colorIndex++
+      }
+    })
 
     const container = document.createElement('div')
     container.className = 'timetable-container'
@@ -114,27 +129,37 @@ function renderSchedules (schedules) {
         if (rendered[i - 1][day]) return
         const cell = document.createElement('td')
 
-        // Xử lý định dạng mới của dữ liệu
+
         for (const courseData of timetableData) {
-          // courseData bây giờ là một mảng [tên_khóa_học, thông_tin_chi_tiết]
           const courseName = courseData[0]
           const info = courseData[1]
 
-          const mappedDay = dayMapping[info.day]
-          if (!mappedDay || mappedDay !== day) continue
+          if (info.day !== day) continue
 
           if (info.periods.includes(i)) {
             const isStart = i === Math.min(...info.periods)
             const rowspan = info.periods.length
 
             if (isStart) {
-              cell.textContent = courseName
-              cell.classList.add('filled', 'yellow')
+              const roomCode = `${info.area}.${info.room}`
+              const subTopic = info.sub_topic?.trim() ?? ''
+
+              const courseInfo = `${courseName} (${info.class_index})${subTopic ? '_' + subTopic : ''}`
+              cell.innerHTML = `
+                ${courseInfo}
+                <br>
+                <small>${roomCode}</small>
+              `
+              cell.classList.add('filled')
+              
+              // Sử dụng class màu tương ứng với khóa học
+              cell.classList.add(courseColorMap[courseName])
+              
               cell.setAttribute('rowspan', rowspan)
 
               // Thêm thông tin chi tiết cho hộp thông tin khi di chuột vào
               cell.addEventListener('mouseover', () => {
-                inputs.subject.value = courseName
+                inputs.subject.value = courseInfo
                 inputs.teacher.value = info.teacher
                 inputs.time.value = `${
                   periodLabels[info.periods[0] - 1].split(': ')[1]
@@ -143,12 +168,12 @@ function renderSchedules (schedules) {
                     ': '
                   )[1]
                 }`
-                inputs.room.value = `${info.area}.${info.room}`
+                inputs.room.value = roomCode
 
                 // Hiển thị thông tin bổ sung nếu có
-                if (info.sub_topic) {
-                  inputs.subject.value += ` (${info.sub_topic})`
-                }
+                // if (info.sub_topic) {
+                //   inputs.subject.value += ` _${info.sub_topic}`
+                // }
               })
 
               cell.addEventListener('mouseleave', () => {

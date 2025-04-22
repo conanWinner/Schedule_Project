@@ -1,8 +1,8 @@
 /* style.css */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e9dee9;
-    padding: 30px;
+  font-family: Arial, sans-serif;
+  background-color: #dff0d8;
+  padding: 30px;
   }
   
   .container {
@@ -17,7 +17,7 @@ body {
   
   h2 {
     text-align: center;
-    color: #6b2b52;
+    color: #3c763d;
     margin-bottom: 20px;
   }
   
@@ -76,8 +76,12 @@ body {
   }
   
   th {
-    background-color: #6b2b52;
-    color: white;
+    background-color: #dff0d8;
+    color: #3c763d;
+  }
+
+  .note{
+    margin-top: 20px;
   }
   
   .note textarea {
@@ -88,7 +92,8 @@ body {
   .submit-btn {
     display: block;
     margin: 30px auto 0;
-    background: linear-gradient(to right, #7b1fa2, #ab47bc);
+    background: linear-gradient(to right, #5c9f40, #2a3f54);
+    /* background: #2a3f54; */
     color: white;
     border: none;
     padding: 16px 50px;
@@ -98,7 +103,7 @@ body {
   }
   
   .submit-btn:hover {
-    background: linear-gradient(to right, #6a1b9a, #9c27b0);
+    background: linear-gradient(to right, #2a3f54, #5c9f40);
   }
   
   .toggle-btn {

@@ -6,7 +6,12 @@ const suggestionBox = document.getElementById('suggestionBox')
 // Gợi ý từ API giả (mock)
 subjectInput.addEventListener('input', () => {
   const query = subjectInput.value.trim()
-  if (!query) return (suggestionBox.innerHTML = '')
+
+  // Nếu input rỗng thì xóa gợi ý và không gọi API
+  if (!query) {
+    suggestionBox.innerHTML = ''
+    return
+  }
 
   const payload = { query }
 
@@ -23,7 +28,7 @@ subjectInput.addEventListener('input', () => {
     })
     .then(data => {
       suggestionBox.innerHTML = ''
-
+      console.log(data.results)
       const seen = new Set()
 
       ;(data.results || []).forEach(item => {
