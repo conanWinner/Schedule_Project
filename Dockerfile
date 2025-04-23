@@ -6,10 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /code
 
-# Cài các phụ thuộc hệ thống cần thiết (nếu cần thêm có thể mở rộng)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements riêng để tối ưu cache layer
 COPY app/requirements.txt ./app/requirements.txt

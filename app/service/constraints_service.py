@@ -7,9 +7,9 @@ from dataclasses import asdict
 import pandas as pd
 from deap import base, creator, tools, algorithms
 
-from app.constant.constant_input_test import USER_PREFERENCES
+
 from app.constant.constant_of_schedule import SCHEDULE_OF_CLASSES, PRIORITY_WEIGHTS
-from app.model.Class_Info import ClassInfo
+
 
 # Thiết lập NSGA-II
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
