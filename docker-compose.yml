@@ -1,9 +1,11 @@
 version: '3.9'
 
 services:
-  schedule_backend:
+  schedule_be_nsgaii:
     build: .
-    container_name: schedule_be_nsgaii
+    image: schedule_be_nsgaii:v4
+    env_file:
+      - .env
     ports:
       - "8001:8001"
     environment:
